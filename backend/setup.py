@@ -8,6 +8,7 @@ setup(
         'numpy>=1.18.1',  # 例としてnumpyパッケージを依存関係として追加
         'pandas>=1.0.1',
         'flask',
-        'flask_cors'
+        'flask_cors',
+        'boto3'
     ]
 )
