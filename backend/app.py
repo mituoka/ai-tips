@@ -20,7 +20,7 @@ s3 = boto3.client(
     region_name=region_name
 )
 
-@app.route('/upload', methods=['POST'])
+@app.route('/api/upload', methods=['POST','OPTIONS'])
 def upload_file():
     print('ファイルアップロード開始')
     if 'file' not in request.files:

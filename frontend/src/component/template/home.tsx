@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import styled from "styled-components";
+import axios from "axios"; // axiosをインポート
 import Button from "../atoms/button";
 import ImageArea from "../atoms/imageArea";
 
@@ -30,18 +31,15 @@ const HomePage: React.FC = () => {
 			const formData = new FormData();
 			formData.append("file", file);
 
-			fetch("http://localhost:5000/upload", {
-				method: "POST",
-				body: formData,
-			})
-				.then((response) => {
-					if (!response.ok) {
-						throw new Error("Network response was not ok");
-					}
-					return response.json();
+			// axiosを使用してAPI呼び出し
+			axios
+				.post("http://127.0.0.1:5000/api/upload", formData, {
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
 				})
-				.then((data) => {
-					console.log("File uploaded successfully", data);
+				.then((response) => {
+					console.log("File uploaded successfully", response.data);
 				})
 				.catch((error) => {
 					console.error("Error uploading file", error);
