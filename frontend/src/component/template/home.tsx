@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import styled from "styled-components";
-import axios from "axios"; // axiosをインポート
+import axios from "axios";
 import Button from "../atoms/button";
 import ImageArea from "../atoms/imageArea";
 
@@ -15,53 +15,72 @@ const StyledButtonArea = styled.div`
 
 const HomePage: React.FC = () => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+	const [imageURL, setImageURL] = useState(
+		`${process.env.PUBLIC_URL}/images/no_image.png`
+	);
 
-	const handleButtonClick = () => {
-		if (fileInputRef.current) {
-			fileInputRef.current.click();
-		}
-	};
-
-	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFileChange = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
 		const files = event.target.files;
 		if (files && files.length > 0) {
 			const file = files[0];
-			setSelectedFileName(file.name);
-			const formData = new FormData();
-			formData.append("file", file);
+			setImageURL(URL.createObjectURL(file));
+			await uploadImageFile(file);
+			await getImageData(file.name);
+		}
+	};
 
-			// axiosを使用してAPI呼び出し
-			axios
-				.post("http://127.0.0.1:5000/api/upload", formData, {
+	const uploadImageFile = async (file: File) => {
+		const formData = new FormData();
+		formData.append("file", file);
+		try {
+			const response = await axios.post(
+				"http://127.0.0.1:5000/api/upload_image",
+				formData,
+				{
 					headers: {
 						"Content-Type": "multipart/form-data",
 					},
-				})
-				.then((response) => {
-					console.log("File uploaded successfully", response.data);
-				})
-				.catch((error) => {
-					console.error("Error uploading file", error);
-				});
+				}
+			);
+			console.log("File uploaded successfully", response.data);
+		} catch (error) {
+			console.error("Error uploading file", error);
+		}
+	};
+
+	const getImageData = async (fileName: string) => {
+		try {
+			const response = await axios.get(
+				`http://127.0.0.1:5000/api/download_image?filename=${encodeURIComponent(
+					fileName
+				)}`,
+				{
+					responseType: "blob",
+				}
+			);
+			const url = URL.createObjectURL(new Blob([response.data]));
+			setImageURL(url);
+			console.log("File download successfully", response.data);
+		} catch (error) {
+			console.error("Error download file", error);
 		}
 	};
 
 	return (
 		<>
-			<input
-				type="file"
-				ref={fileInputRef}
-				onChange={handleFileChange}
-				style={{ display: "none" }}
-			/>
 			<StyledImageArea>
-				<ImageArea
-					imageUrl={`${process.env.PUBLIC_URL}/images/${selectedFileName}`}
-				/>
+				<ImageArea imageUrl={imageURL} />
 			</StyledImageArea>
 			<StyledButtonArea>
-				<Button name="Load" onClick={handleButtonClick} />
+				<Button name="Upload" onClick={() => fileInputRef.current?.click()} />
+				<input
+					type="file"
+					ref={fileInputRef}
+					style={{ display: "none" }}
+					onChange={handleFileChange}
+				/>
 			</StyledButtonArea>
 		</>
 	);

@@ -1,8 +1,8 @@
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, send_file
 import boto3
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
-import os  # osモジュールをインポート
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -20,7 +20,7 @@ s3 = boto3.client(
     region_name=region_name
 )
 
-@app.route('/api/upload', methods=['POST','OPTIONS'])
+@app.route('/api/upload_image', methods=['POST'])
 def upload_file():
     print('ファイルアップロード開始')
     if 'file' not in request.files:
@@ -35,6 +35,28 @@ def upload_file():
         response = make_response('File uploaded successfully', 200)
         response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'
         return response
+
+
+@app.route('/api/download_image', methods=['GET'])
+def download_file():
+    print('ファイルダウンロード開始')
+    filename = request.args.get('filename')  
+
+    if not filename:
+        return 'Filename is required', 400
+
+    filename_secure = secure_filename(filename)
+
+    temp_file_path = os.path.join('/tmp', filename_secure)
+
+    try:
+        s3.download_file('ai-tips-backet', filename_secure, temp_file_path)
+
+        return send_file(temp_file_path, as_attachment=True, download_name=filename_secure)
+    except Exception as e:
+        print(e)
+        return 'Error downloading file from S3', 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

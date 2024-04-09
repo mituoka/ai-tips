@@ -12,7 +12,6 @@ frontend/coverage
 frontend/build
 
 # misc
-frontend/DS_Store
 frontend/env.local
 frontend/env.development.local
 frontend/env.test.local
@@ -24,3 +23,4 @@ frontend/yarn-error.log*
 backend/venv
 backend/my_package.egg-info
 backend/build
+**/.DS_Store
