@@ -3,6 +3,8 @@ import boto3
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
 import os
+from PIL import Image
+import io
 
 app = Flask(__name__)
 CORS(app)
@@ -52,7 +54,21 @@ def download_file():
     try:
         s3.download_file('ai-tips-backet', filename_secure, temp_file_path)
 
-        return send_file(temp_file_path, as_attachment=True, download_name=filename_secure)
+        # 画像をリサイズ
+        img = Image.open(temp_file_path)
+        img = img.resize((600, 400))  # 例として幅600px、高さ400pxにリサイズ
+        img_byte_arr = io.BytesIO()
+        img.save(img_byte_arr, format=img.format)
+        img_byte_arr = img_byte_arr.getvalue()
+
+        # リサイズした画像をクライアントに送信
+        return send_file(
+            io.BytesIO(img_byte_arr),
+            mimetype='image/jpeg',  # 適宜変更してください
+            as_attachment=True,
+            download_name=filename_secure
+        )
+
     except Exception as e:
         print(e)
         return 'Error downloading file from S3', 500

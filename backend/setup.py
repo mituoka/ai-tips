@@ -10,5 +10,6 @@ setup(
         'flask',
         'flask_cors',
         'boto3'
+        'Pillow'
     ]
 )
