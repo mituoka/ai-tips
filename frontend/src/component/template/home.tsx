@@ -4,10 +4,6 @@ import axios from "axios";
 import Button from "../atoms/button";
 import ImageArea from "../atoms/imageArea";
 
-const StyledImageArea = styled.div`
-	margin-bottom: 20px;
-`;
-
 const StyledButtonArea = styled.div`
 	display: flex;
 	justify-content: center;
@@ -70,9 +66,9 @@ const HomePage: React.FC = () => {
 
 	return (
 		<>
-			<StyledImageArea>
+			<div>
 				<ImageArea imageUrl={imageURL} />
-			</StyledImageArea>
+			</div>
 			<StyledButtonArea>
 				<Button name="Upload" onClick={() => fileInputRef.current?.click()} />
 				<input
