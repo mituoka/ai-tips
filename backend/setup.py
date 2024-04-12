@@ -9,7 +9,7 @@ setup(
         'pandas>=1.0.1',
         'flask',
         'flask_cors',
-        'boto3'
+        'boto3',
         'Pillow'
     ]
 )

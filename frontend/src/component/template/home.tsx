@@ -23,7 +23,6 @@ const HomePage: React.FC = () => {
 			const file = files[0];
 			setImageURL(URL.createObjectURL(file));
 			await uploadImageFile(file);
-			await getImageData(file.name);
 		}
 	};
 
@@ -31,6 +30,7 @@ const HomePage: React.FC = () => {
 		const formData = new FormData();
 		formData.append("file", file);
 		try {
+			// axios.postをawaitで待ち、レスポンスを直接変数に格納
 			const response = await axios.post(
 				"http://127.0.0.1:5000/api/upload_image",
 				formData,
@@ -40,27 +40,9 @@ const HomePage: React.FC = () => {
 					},
 				}
 			);
-			console.log("File uploaded successfully", response.data);
+			console.log("Average Color:", response.data.average_color);
 		} catch (error) {
 			console.error("Error uploading file", error);
-		}
-	};
-
-	const getImageData = async (fileName: string) => {
-		try {
-			const response = await axios.get(
-				`http://127.0.0.1:5000/api/download_image?filename=${encodeURIComponent(
-					fileName
-				)}`,
-				{
-					responseType: "blob",
-				}
-			);
-			const url = URL.createObjectURL(new Blob([response.data]));
-			setImageURL(url);
-			console.log("File download successfully", response.data);
-		} catch (error) {
-			console.error("Error download file", error);
 		}
 	};
 

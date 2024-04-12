@@ -21,6 +21,7 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 backend/venv
+backend/__pycache__
 backend/my_package.egg-info
 backend/build
 **/.DS_Store

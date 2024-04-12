@@ -1,78 +1,58 @@
-from flask import Flask, request, make_response, send_file
-import boto3
+from flask import Flask, request, make_response, jsonify
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
+from aws_service import S3Service
+from io import BytesIO
 import os
 from PIL import Image
-import io
+import numpy as np
+
 
 app = Flask(__name__)
 CORS(app)
+s3_service = S3Service()
 
-# 環境変数から設定を読み込む
-aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
-aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-region_name = os.environ.get('AWS_REGION')
-
-# S3設定
-s3 = boto3.client(
-    's3',
-    aws_access_key_id=aws_access_key_id,
-    aws_secret_access_key=aws_secret_access_key,
-    region_name=region_name
-)
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
 
 @app.route('/api/upload_image', methods=['POST'])
 def upload_file():
-    print('ファイルアップロード開始')
+    print('画像解析処理開始')
     if 'file' not in request.files:
         return 'No file part', 400
     file = request.files['file']
     if file.filename == '':
         return 'No selected file', 400
-    if file:
+    if file :
+        
         filename = secure_filename(file.filename)
-        # ファイルをS3にアップロード
-        s3.upload_fileobj(file, 'ai-tips-backet', filename)
-        response = make_response('File uploaded successfully', 200)
-        response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'
-        return response
+        s3_service.upload_fileobj(file, filename) 
+        return jsonify(response), 200
+    else:
+        return jsonify({'error': 'Invalid file format'}), 40
 
-
-@app.route('/api/download_image', methods=['GET'])
-def download_file():
-    print('ファイルダウンロード開始')
-    filename = request.args.get('filename')  
-
-    if not filename:
-        return 'Filename is required', 400
-
-    filename_secure = secure_filename(filename)
-
-    temp_file_path = os.path.join('/tmp', filename_secure)
-
-    try:
-        s3.download_file('ai-tips-backet', filename_secure, temp_file_path)
-
-        # 画像をリサイズ
-        img = Image.open(temp_file_path)
-        img = img.resize((600, 400))  # 例として幅600px、高さ400pxにリサイズ
-        img_byte_arr = io.BytesIO()
-        img.save(img_byte_arr, format=img.format)
-        img_byte_arr = img_byte_arr.getvalue()
-
-        # リサイズした画像をクライアントに送信
-        return send_file(
-            io.BytesIO(img_byte_arr),
-            mimetype='image/jpeg',  # 適宜変更してください
-            as_attachment=True,
-            download_name=filename_secure
-        )
-
-    except Exception as e:
-        print(e)
-        return 'Error downloading file from S3', 500
-
+def image_analysis():
+    print('画像解析処理開始')
+    if 'file' not in request.files:
+        return 'No file part', 400
+    file = request.files['file']
+    if file.filename == '':
+        return 'No selected file', 400
+    if file and allowed_file(file.filename):
+        image = Image.open(file.stream)
+        image_np = np.array(image)
+        average_color = np.mean(image_np, axis=(0, 1)) 
+        response = {
+            'average_color': {
+                'red': int(average_color[0]),
+                'green': int(average_color[1]),
+                'blue': int(average_color[2])
+            }
+        }
+        
+        return jsonify(response), 200
+    else:
+        return jsonify({'error': 'Invalid file format'}), 40
 
 if __name__ == '__main__':
     app.run(debug=True)
