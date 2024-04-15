@@ -12,8 +12,25 @@ app = Flask(__name__)
 CORS(app)
 s3_service = S3Service()
 
+users = {
+    "user1": "password1"
+}
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data['username']
+    password = data['password']
+    if username in users and users[username] == password:
+        return jsonify({"message": "Login successful", "authenticated": True}), 200
+    else:
+        return jsonify({"message": "Invalid credentials", "authenticated": False}), 401
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 @app.route('/api/upload_image', methods=['POST'])
 def upload_file():
@@ -26,7 +43,7 @@ def upload_file():
     if file :
         
         filename = secure_filename(file.filename)
-        s3_service.upload_fileobj(file, filename) 
+        response = s3_service.upload_fileobj(file, filename) 
         return jsonify(response), 200
     else:
         return jsonify({'error': 'Invalid file format'}), 40

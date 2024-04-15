@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 interface ImageAreaProps {
-	imageUrl: string; // 画像のURLをpropsから受け取ります
+	imageUrl: string;
 }
 
 const StyledImageArea = styled.div`

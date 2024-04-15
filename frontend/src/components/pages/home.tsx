@@ -3,10 +3,16 @@ import styled from "styled-components";
 import axios from "axios";
 import Button from "../atoms/button";
 import ImageArea from "../atoms/imageArea";
+import ListView from "../molecules/listView";
 
 const StyledButtonArea = styled.div`
 	display: flex;
 	justify-content: center;
+`;
+
+const StyledListViewArea = styled.div`
+	width: 50%;
+	margin: 20px auto;
 `;
 
 const HomePage: React.FC = () => {
@@ -60,6 +66,9 @@ const HomePage: React.FC = () => {
 					onChange={handleFileChange}
 				/>
 			</StyledButtonArea>
+			<StyledListViewArea>
+				<ListView />
+			</StyledListViewArea>
 		</>
 	);
 };
