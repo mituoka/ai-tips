@@ -9,5 +9,6 @@ http://localhost:80 にアクセスで
 # backend の起動
 
 cd backend
+source venv/bin/activate
 pip install .
-python
+python app.py

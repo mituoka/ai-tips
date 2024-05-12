@@ -25,3 +25,4 @@ backend/__pycache__
 backend/my_package.egg-info
 backend/build
 **/.DS_Store
+.env

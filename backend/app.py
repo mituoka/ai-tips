@@ -29,9 +29,6 @@ def login():
     else:
         return jsonify({"message": "Invalid credentials", "authenticated": False}), 401
 
-if __name__ == '__main__':
-    app.run(debug=True)
-
 @app.route('/api/upload_image', methods=['POST'])
 def upload_file():
     print('画像解析処理開始')
