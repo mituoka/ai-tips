@@ -8,6 +8,8 @@ import ListView from "../molecules/listView";
 const StyledButtonArea = styled.div`
 	display: flex;
 	justify-content: center;
+	margin: 10px 0;
+	gap: 20px; /* ボタン同士の間に20pxのギャップを追加 */
 `;
 
 const StyledListViewArea = styled.div`
@@ -59,6 +61,7 @@ const HomePage: React.FC = () => {
 			</div>
 			<StyledButtonArea>
 				<Button name="Upload" onClick={() => fileInputRef.current?.click()} />
+				<Button name="Analysis" onClick={() => fileInputRef.current?.click()} />
 				<input
 					type="file"
 					ref={fileInputRef}

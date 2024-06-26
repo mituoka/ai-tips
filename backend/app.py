@@ -7,7 +7,7 @@ import os
 from PIL import Image
 import numpy as np
 
-
+# テスト
 app = Flask(__name__)
 CORS(app)
 s3_service = S3Service()
@@ -27,7 +27,7 @@ def login():
     if username in users and users[username] == password:
         return jsonify({"message": "Login successful", "authenticated": True}), 200
     else:
-        return jsonify({"message": "Invalid credentials", "authenticated": False}), 401
+        return jsonify({"message": "Invalid credentials", "authenticated": False}), 400
 
 @app.route('/api/upload_image', methods=['POST'])
 def upload_file():

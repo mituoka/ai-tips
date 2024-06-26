@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,7 @@ const LoginForm: React.FC = () => {
 		formState: { errors },
 	} = useForm<FormData>();
 	const navigate = useNavigate(); // useNavigate フックを使用
+	const [errorMessage, setErrorMessage] = useState<string | null>(null); // エラーメッセージの状態
 
 	const onSubmit = async (data: FormData) => {
 		try {
@@ -22,11 +23,35 @@ const LoginForm: React.FC = () => {
 				"http://127.0.0.1:5000/api/login",
 				data
 			);
+			if (response.status !== 200) {
+				setErrorMessage(
+					"Login failed. Please check your username and password."
+				);
+				return;
+			}
+
 			if (response.data.authenticated) {
-				navigate("/home"); // ログイン成功後に/homeにナビゲート
+				navigate("/home");
 			}
 		} catch (error) {
-			console.error("Login failed:", error);
+			if (axios.isAxiosError(error)) {
+				// AxiosError からステータスコードを取得
+				const status = error.response?.status;
+				if (status === 400) {
+					setErrorMessage("Incorrect username and password.");
+				} else {
+					setErrorMessage(
+						`Login request failed with status code: ${status}. Please try again later.`
+					);
+				}
+				console.error("Login failed:", error.message);
+			} else {
+				// 非Axiosエラーの処理
+				console.error("An unexpected error occurred:", error);
+				setErrorMessage(
+					"An unexpected error occurred. Please try again later."
+				);
+			}
 		}
 	};
 
@@ -42,6 +67,7 @@ const LoginForm: React.FC = () => {
 				<input type="password" {...register("password", { required: true })} />
 				{errors.password && <p>This field is required</p>}
 			</div>
+			{errorMessage && <div>{errorMessage}</div>}
 			<button type="submit">Login</button>
 		</form>
 	);
